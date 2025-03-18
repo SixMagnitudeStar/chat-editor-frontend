@@ -46,6 +46,10 @@ const count = ref(0)
 <p @click="handleClick">測試面板</p>
 <textarea ref = "text1" >===</textarea>
 <iframe ref="iframe"  id="myiframe" width="600" height="400"></iframe>
+<code>
+   let a = 'vv';
+</code>
+
 </template>
 
 <style scoped>
