@@ -1,22 +1,31 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
+
 
 defineProps({
   msg: String,
 })
 
+
+const testdiv = ref(null); // 確保 ref 正確綁定
 const iframe = ref(null);
 const text1 = ref(null);
 const code1 = ref(null);
 
+onMounted(() => {
+  // 取得 <code> 內部的內容，並寫入 HTML
+  testdiv.value.querySelector("code").textContent = "<h1>顯示看看</h1>\n<h2>似乎成功</h2>";
+  iframe.value.srcdoc =  "<h1>顯示看看</h1><h2>似乎成功</h2>";
 
+  // 讓 Prism.js 解析這段程式碼
+  window.Prism.highlightElement(testdiv.value.querySelector("code"));
+});
 
 const handleClick = async () => {
     alert('click喔!');
    // iframe.value.srcdoc = "<h1>Hello, World!</h1><p>This is embedded content.</p>";
     //text1.value.value = "測試文本ㄅㄅㄅ";
-
     let prompt = text1.value.value;
     const encodedPrompt = encodeURIComponent(prompt);
     alert('輸出值:'+`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
@@ -52,7 +61,38 @@ const handleClick = async () => {
 }
 
 
+const handleEnter = async (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();  // 防止輸入框換行
+    alert('Enter 被按下了');
+    // 在這裡處理按下 Enter 後的邏輯
+    let prompt = text1.value.value;
+    const encodedPrompt = encodeURIComponent(prompt);
+    alert('輸出值:'+`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
+    console.log(`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
 
+    // 發送API請求
+    // 發送API請求
+    try {
+        const response = await axios.get(`http://localhost:3000/api/getCode?message=${encodedPrompt}`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+       // text1.value.value = response.data.generatedText;
+       console.log('請求');
+
+       iframe.value.srcdoc = response.data.generatedText;
+       code1.value.innerHTML = response.data.generatedText;
+
+        // 直接取得回應的資料
+        console.log('API response:', response.data);
+    } catch (error) {
+        console.error('Error fetching API:', error);
+    }
+  }
+}
 
 
 const count = ref(0)
@@ -66,13 +106,16 @@ const count = ref(0)
 <div class="content">
   <h1>Chat Editor</h1>
   <h2 class="title">一種基於自然語言的網頁開發方式</h2>
+  <pre ref="testdiv"><code class="language-html"></code></pre>
+
   <pre>
   輸入你想要的網頁類型，並依據下方顯示的瀏覽模樣，輸入prompt調整至期望樣式
   例如，想要一個登入登出畫面，並依據顯示的樣子，進一步修正，如背景想要的顏色、字體擺放位置與大小等等
   </pre>
 
   <p @click="handleClick">測試面板</p>
-  <textarea id="text1" ref = "text1" >===</textarea>
+
+  <textarea id="text1" ref = "text1" @keydown.enter="handleEnter" >===</textarea>
   <div id = 'container1'>
     <div id="container2">
       code
@@ -81,6 +124,7 @@ const count = ref(0)
     </div>
   <iframe ref="iframe"  id="myiframe" ></iframe>
   </div>
+
 
 </div>
 </template>
@@ -101,6 +145,11 @@ const count = ref(0)
   position: relative;
 }
 
+code {
+  display: block;
+  white-space: pre-wrap; /* 避免單行文本過長不換行 */
+  word-wrap: break-word; /* 長單字會自動換行 */
+}
 
 #code1{
   display: block;
