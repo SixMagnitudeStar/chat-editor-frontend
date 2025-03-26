@@ -8,6 +8,7 @@ defineProps({
 
 const iframe = ref(null);
 const text1 = ref(null);
+const code1 = ref(null);
 
 
 
@@ -33,8 +34,15 @@ const handleClick = async () => {
        // text1.value.value = response.data.generatedText;
        console.log('請求');
 
-       iframe.value.srcdoc = response.data.generatedText;
-       code1.value.innerHTML = response.data.generatedText;
+       alert(response.data.generatedText);
+       //let cleanHtml = response.data.generatedText.replace(/^```html|```$/g, "").trim();
+       let cleanHtml = response.data.generatedText.replace(/^```(?:html)?\n|\n```$/g, "").trim();
+
+
+      //iframe.value.srcdoc = response.data.generatedText;
+       iframe.value.srcdoc =  cleanHtml;
+      // code1.value.innerHTML = response.data.generatedText;
+       code1.value.textContent = cleanHtml ;
 
         // 直接取得回應的資料
         console.log('API response:', response.data);
@@ -68,7 +76,8 @@ const count = ref(0)
   <div id = 'container1'>
     <div id="container2">
       code
-      <code id="code1" ref="code1"></code>
+      <pre><code id="code1" ref="code1"></code></pre>
+
     </div>
   <iframe ref="iframe"  id="myiframe" ></iframe>
   </div>
@@ -96,7 +105,7 @@ const count = ref(0)
 #code1{
   display: block;
   width: 25vw;
-  height: 20vh;
+  height: auto;
   overflow: auto;
   white-space: pre-wrap;
   margin : 1vw;
@@ -165,3 +174,4 @@ pre {
 }
 
 </style>
+<!DOCTYPE html>
