@@ -8,82 +8,29 @@ defineProps({
 })
 
 
-const testdiv = ref(null); // 確保 ref 正確綁定
-const iframe = ref(null);
-const text1 = ref(null);
-const code1 = ref(null);
+const code_monitor = ref(null);
+const requestPanel = ref(null);
+const code_content = ref(null);
 const loading = ref(false);  // 控制 loading 顯示
-const code2 = ref(null);
 
 onMounted(() => {
   // 取得 <code> 內部的內容，並寫入 HTML
-  text1.value.textContent='給我一個HELLOWRLD標題';
-  testdiv.value.querySelector("code").textContent = "<h1>顯示看看</h1>\n<h2>似乎成功</h2>";
-  code2.value.textContent = "<h1>顯示看看ㄎ</h1>\n<h2>似乎成功</h2>";
-  iframe.value.srcdoc =  "<h1>顯示看看</h1><h2>似乎成功</h2>";
+  code_monitor.value.srcdoc =  "<h1>顯示看看</h1><h2>似乎成功</h2>";
 
   // 讓 Prism.js 解析這段程式碼
   window.Prism.highlightElement(testdiv.value.querySelector("code"));
 });
-
-
-
-const handleClick = async () => {
-    alert('click喔!');
-   // iframe.value.srcdoc = "<h1>Hello, World!</h1><p>This is embedded content.</p>";
-    //text1.value.value = "測試文本ㄅㄅㄅ";
-    loading.value = true;
-    let prompt = text1.value.value;
-    const encodedPrompt = encodeURIComponent(prompt);
-    alert('輸出值:'+`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
-    console.log(`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
-    
-    // 發送API請求
-    // 發送API請求
-    try {
-
-        const response = await axios.get(`http://localhost:3000/api/getCode?message=${encodedPrompt}`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-       // text1.value.value = response.data.generatedText;
-       console.log('請求');
-
-       alert(response.data.generatedText);
-       //let cleanHtml = response.data.generatedText.replace(/^```html|```$/g, "").trim();
-      //  let cleanHtml = response.data.generatedText.replace(/^```(?:html)?\n|\n```$/g, "").trim();
-      // let cleanHtml = htmlText.replace(/^```.*?\n|\n```$/g, "");
-
-      iframe.value.srcdoc = response.data.generatedText;
-      //iframe.value.srcdoc =  cleanHtml;
-   //
-   //    code1.value.innerHTML = response.data.generatedText;
-      code1.value.textContent = cleanHtml ;
-
-        // 直接取得回應的資料
-        console.log('API response:', response.data);
-    } catch (error) {
-        console.error('Error fetching API:', error);
-    }finally{
-      loading.value = false;  // 確保請求結束後關閉 loading
-
-    }
-}
-
 
 const handleEnter = async (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();  // 防止輸入框換行
     alert('Enter 被按下了');
     // 在這裡處理按下 Enter 後的邏輯
-    let prompt = text1.value.value;
-    const encodedPrompt = encodeURIComponent(prompt);
-    alert('輸出值:'+`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
-    console.log(`http://localhost:3000/api/getCode?message=${encodedPrompt}`);
 
-    // 發送API請求
+    loading.value = true;
+    let prompt = requestPanel.value.value;
+    const encodedPrompt = encodeURIComponent(prompt);
+
     // 發送API請求
     try {
         const response = await axios.get(`http://localhost:3000/api/getCode?message=${encodedPrompt}`, {
@@ -92,16 +39,18 @@ const handleEnter = async (event) => {
             },
         });
 
-       // text1.value.value = response.data.generatedText;
        console.log('請求');
 
-       iframe.value.srcdoc = response.data.generatedText;
-       code1.value.textContent = response.data.generatedText;
+       code_monitor.value.srcdoc = response.data.generatedText;
+       code_content.value.textContent = response.data.generatedText;
 
         // 直接取得回應的資料
         console.log('API response:', response.data);
     } catch (error) {
         console.error('Error fetching API:', error);
+    }finally{
+      //隱藏loading動畫
+      loading.value = false;
     }
   }
 }
@@ -119,27 +68,20 @@ const count = ref(0)
   <p v-if="loading">這是一個測試標籤</p>
   <h1>Chat Editor</h1>
   <h2 class="title">一種基於自然語言的網頁開發方式</h2>
-  <pre ref="testdiv"><code class="language-html"></code></pre>
-
-  <code ref="code2" class="language-html"></code>
-    <!-- 顯示 loading 動畫 -->
-    <div v-if="loading" class="loading-spinner">
-      <span>Loading...</span>
+     <!-- Loading 遮罩 -->
+     <div v-if="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <span>等候頁面生成...</span>
     </div>
-  <pre>
-  輸入你想要的網頁類型，並依據下方顯示的瀏覽模樣，輸入prompt調整至期望樣式
-  例如，想要一個登入登出畫面，並依據顯示的樣子，進一步修正，如背景想要的顏色、字體擺放位置與大小等等
-  </pre>
 
-  <p @click="handleClick">測試面板</p>
-
-  <textarea id="text1" ref = "text1" @keydown.enter="handleEnter" >===</textarea>
-  <div id = 'container1'>
-    <div id="container2">
-      <pre><code id="code1" ref="code1" class="language-html"></code></pre>
-
+  <textarea id="requestPanel" ref = "requestPanel" @keydown.enter="handleEnter"  placeholder="請描述你想要的網頁">===</textarea>
+  <hr>
+  <div id = 'container'>
+    <div id="code_container">
+      <p>code</p>
+      <pre><code id="code_content" ref="code_content" class="language-html"></code></pre>
     </div>
-  <iframe ref="iframe"  id="myiframe" ></iframe>
+  <iframe ref="code_monitor"  id="code_monitor" ></iframe>
   </div>
 
 
@@ -151,7 +93,7 @@ const count = ref(0)
   color: #888;
 }
 
-#text1{
+#requestPanel{
   width: 30vw;
   display: block;
   height: 15vw;
@@ -162,27 +104,41 @@ const count = ref(0)
   position: relative;
 }
 
-code {
 
-}
-
-#code1{
-}
-
-#container1{
+#container{
   display: flex;
   margin :1vw;
 }
 
+#code_container{
+  background-color: rgba(0, 0, 0, 0.8);/* 半透明黑色背景 */
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto; /* 避免長行溢出 */
+}
+
+#code_content{
+  display: block;
+  height: 40vh;
+  width: 30vw;
+  left: 0;
+  border-color: transparent;
+}
+
+p{
+  color: white;
+}
 
 
-#myiframe{
+#code_monitor{
   margin : 1vw;
   width: 60vw;
   height: 50vh;
 }
 
-
+pre{
+  text-align: left;
+}
 
 
 .title {
@@ -202,13 +158,43 @@ code {
   left: 0;
 }
 
-/* loading圖示*/
-.loading-spinner {
+/* 遮罩背景 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 9999; /* 確保在最上層 */
+  color: white;
   font-size: 20px;
-  color: #000;
 }
+
+/* 旋轉圈圈 */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid white;
+  border-top: 5px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 </style>
 <!DOCTYPE html>
