@@ -12,7 +12,7 @@ import EditPanel  from './components/EditPanel.vue';
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a> -->
   </div>
-   <EditPanel msg="RRR" :style="{ left: leftPosition + 'px' }"></EditPanel>
+   <EditPanel msg="" :style="{ left: leftPosition + 'px' }"></EditPanel>
   <!-- <HelloWorld msg="Vite + Vue" /> -->
  
 </template>

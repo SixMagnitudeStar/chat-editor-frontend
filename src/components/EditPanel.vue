@@ -15,16 +15,16 @@ const loading = ref(false);  // 控制 loading 顯示
 
 onMounted(() => {
   // 取得 <code> 內部的內容，並寫入 HTML
-  code_monitor.value.srcdoc =  "<h1>顯示看看</h1><h2>似乎成功</h2>";
+  //code_monitor.value.srcdoc =  "<h1>顯示看看</h1><h2>似乎成功</h2>";
 
   // 讓 Prism.js 解析這段程式碼
-  window.Prism.highlightElement(testdiv.value.querySelector("code"));
+  //window.Prism.highlightElement(testdiv.value.querySelector("code"));
 });
 
 const handleEnter = async (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();  // 防止輸入框換行
-    alert('Enter 被按下了');
+    //alert('Enter 被按下了');
     // 在這裡處理按下 Enter 後的邏輯
 
     loading.value = true;
@@ -67,14 +67,14 @@ const count = ref(0)
 <div class="content">
   <p v-if="loading">這是一個測試標籤</p>
   <h1>Chat Editor</h1>
-  <h2 class="title">一種基於自然語言的網頁開發方式</h2>
+  <h2 class="title">純文字靜態網頁創建編輯工具</h2>
      <!-- Loading 遮罩 -->
      <div v-if="loading" class="loading-overlay">
       <div class="spinner"></div>
       <span>等候頁面生成...</span>
     </div>
 
-  <textarea id="requestPanel" ref = "requestPanel" @keydown.enter="handleEnter"  placeholder="請描述你想要的網頁">===</textarea>
+  <textarea id="requestPanel" ref = "requestPanel" @keydown.enter="handleEnter"  placeholder="請描述你想要的網頁，描述越清晰得到的頁面將越完整"></textarea>
   <hr>
   <div id = 'container'>
     <div id="code_container">
