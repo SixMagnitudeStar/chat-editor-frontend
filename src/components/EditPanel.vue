@@ -42,6 +42,17 @@ const handleEnter = async (event) => {
     let prompt = null;
     
     if (message_queue){
+
+      //當總文本數大於4000，移除訊息列隊最前方的訊息 //最前方的應該是user輸入
+      if (JSON.stringify(message_queue).length > 4000){
+        message_queue.shift();
+
+        //再次移除 //移除的是ai的回覆
+        if (!message_queue){
+          message_queue.shift();
+        }
+      }
+
       prompt = JSON.stringify(message_queue)
              + "請參考以上對話，回答以下內容："
              + requestPanel.value.value;
