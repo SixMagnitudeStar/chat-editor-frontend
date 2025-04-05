@@ -12,6 +12,7 @@ const code_monitor = ref(null);
 const requestPanel = ref(null);
 const code_content = ref(null);
 const loading = ref(false);  // 控制 loading 顯示
+let message_queue = [];
 
 onMounted(() => {
   // 取得 <code> 內部的內容，並寫入 HTML
@@ -21,6 +22,15 @@ onMounted(() => {
   //window.Prism.highlightElement(testdiv.value.querySelector("code"));
 });
 
+
+function createMessage(role, content){
+  return{
+    role : role,
+    content : content
+  }
+}
+
+
 const handleEnter = async (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();  // 防止輸入框換行
@@ -28,7 +38,17 @@ const handleEnter = async (event) => {
     // 在這裡處理按下 Enter 後的邏輯
 
     loading.value = true;
-    let prompt = requestPanel.value.value;
+
+    let prompt = null;
+    
+    if (message_queue){
+      prompt = JSON.stringify(message_queue)
+             + "請參考以上對話，回答以下內容："
+             + requestPanel.value.value;
+    }else{
+      prompt = requestPanel.value.value;
+    }
+
     const encodedPrompt = encodeURIComponent(prompt);
 
     // 發送API請求
@@ -44,6 +64,9 @@ const handleEnter = async (event) => {
        code_monitor.value.srcdoc = response.data.generatedText;
        code_content.value.textContent = response.data.generatedText;
 
+       message_queue.push(createMessage("user", prompt));
+       message_queue.push(createMessage("assistant", response.data.generatedText));
+
         // 直接取得回應的資料
         console.log('API response:', response.data);
     } catch (error) {
@@ -55,7 +78,6 @@ const handleEnter = async (event) => {
   }
 }
 
-
 const count = ref(0)
 
 
@@ -64,28 +86,28 @@ const count = ref(0)
 <template>
   <!-- <h1>{{ msg }}</h1> -->
 
-<div class="content">
-  <p v-if="loading">這是一個測試標籤</p>
-  <h1>Chat Editor</h1>
-  <h2 class="title">純文字靜態網頁創建編輯工具</h2>
-     <!-- Loading 遮罩 -->
-     <div v-if="loading" class="loading-overlay">
-      <div class="spinner"></div>
-      <span>等候頁面生成...</span>
-    </div>
 
-  <textarea id="requestPanel" ref = "requestPanel" @keydown.enter="handleEnter"  placeholder="請描述你想要的網頁，描述越清晰得到的頁面將越完整"></textarea>
-  <hr>
-  <div id = 'container'>
-    <div id="code_container">
-      <p>code</p>
-      <pre><code id="code_content" ref="code_content" class="language-html"></code></pre>
+
+  <div class="content">
+    <h1>Chat Editor</h1>
+    <h2 class="title">純文字靜態網頁創建編輯工具</h2>
+      <!-- Loading 遮罩 -->
+      <div v-if="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <span>等候頁面生成...</span>
+      </div>
+
+    <textarea id="requestPanel" ref = "requestPanel" @keydown.enter="handleEnter"  placeholder="請描述你想要的網頁，描述越清晰得到的頁面將越完整"></textarea>
+    <hr>
+    <div id = 'container'>
+      <div id="code_container">
+        <p>code</p>
+        <pre><code id="code_content" ref="code_content" class="language-html"></code></pre>
+      </div>
+    <iframe ref="code_monitor"  id="code_monitor" ></iframe>
     </div>
-  <iframe ref="code_monitor"  id="code_monitor" ></iframe>
   </div>
 
-
-</div>
 </template>
 
 <style scoped>
@@ -128,6 +150,7 @@ const count = ref(0)
 p{
   color: white;
 }
+
 
 
 #code_monitor{
