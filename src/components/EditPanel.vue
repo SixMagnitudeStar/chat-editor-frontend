@@ -61,14 +61,19 @@ const handleEnter = async (event) => {
     }
 
     const encodedPrompt = encodeURIComponent(prompt);
-
-    // 發送API請求
+    //本地網址要改成後端網址
     try {
-        const response = await axios.get(`http://localhost:3000/api/getCode?message=${encodedPrompt}`, {
+        const response = await axios.get(`https://chat-editor-backend-m20e.onrender.com/api/getCode?message=${encodedPrompt}`, {
             headers: {
                 'Content-Type': 'application/json',
             },
         });
+    // try {
+    //     const response = await axios.get(`http://localhost:3000/api/getCode?message=${encodedPrompt}`, {
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //     });
 
        console.log('請求');
 
